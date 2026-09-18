@@ -1,0 +1,29 @@
+{
+    "schemaVersion": 1,
+    "id": "voxelprint",
+    "version": "${version}",
+    "name": "VoxelPrint",
+    "description": "Prepares Minecraft builds for 3D printing. Select a region in-game and export it into a local .mcprint project file. Runs entirely on the client, so it works on any server.",
+    "authors": [
+        "fantahund"
+    ],
+    "license": "MIT",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            "de.tobi.voxelprint.VoxelPrint"
+        ],
+        "modmenu": [
+            "de.tobi.voxelprint.client.ModMenuIntegration"
+        ]
+    },
+    "depends": {
+        "java": ">=25",
+        "minecraft": "~26.3",
+        "fabricloader": ">=0.19.5",
+        "fabric-api": ">=0.160.7"
+    },
+    "recommends": {
+        "modmenu": "*"
+    }
+}
