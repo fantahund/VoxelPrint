@@ -40,6 +40,12 @@ public final class VoxelPrintConfigRegistration implements ConfigProvider {
                                 "voxelprint.config.export_directory.tooltip",
                                 config::exportDirectory,
                                 config::setExportDirectory,
+                                () -> true, Component::empty),
+                        SettingsOption.text("webPlatformUrl",
+                                "voxelprint.config.web_platform_url",
+                                "voxelprint.config.web_platform_url.tooltip",
+                                config::webPlatformUrl,
+                                config::setWebPlatformUrl,
                                 () -> true, Component::empty)
                 )),
                 new SettingsGroup("voxelprint.config.group.feedback", List.of(

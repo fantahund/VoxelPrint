@@ -34,6 +34,13 @@ public final class VoxelPrintConfig {
     public static final int DEFAULT_MODEL_COLOUR_DETAIL = 4;
     public static final boolean DEFAULT_ASYNCHRONOUS_FILE_WRITING = true;
     public static final StructureFormat DEFAULT_STRUCTURE_FORMAT = StructureFormat.SPONGE_V3;
+    /**
+     * Where an export is sent when somebody clicks Upload.
+     *
+     * <p>Configurable because the platform is a small server anyone can run for
+     * themselves; blank switches uploading off and leaves only the folder.
+     */
+    public static final String DEFAULT_WEB_PLATFORM_URL = "https://voxelprint.emrion.de";
 
     public static final int MIN_SELECTION_VOLUME = 4_096;
     public static final int MAX_SELECTION_VOLUME = 8_388_608;
@@ -64,6 +71,7 @@ public final class VoxelPrintConfig {
     private static final String KEY_MODEL_COLOUR_DETAIL = "Model Colour Detail";
     private static final String KEY_ASYNC_WRITING = "Asynchronous File Writing";
     private static final String KEY_STRUCTURE_FORMAT = "Structure Format";
+    private static final String KEY_WEB_PLATFORM_URL = "Web Platform URL";
 
     private final ConfigFile file;
 
@@ -81,6 +89,7 @@ public final class VoxelPrintConfig {
     private volatile int modelColourDetail = DEFAULT_MODEL_COLOUR_DETAIL;
     private volatile boolean asynchronousFileWriting = DEFAULT_ASYNCHRONOUS_FILE_WRITING;
     private volatile StructureFormat structureFormat = DEFAULT_STRUCTURE_FORMAT;
+    private volatile String webPlatformUrl = DEFAULT_WEB_PLATFORM_URL;
 
     public VoxelPrintConfig(Path path) {
         this.file = new ConfigFile(Objects.requireNonNull(path, "path"));
@@ -108,6 +117,7 @@ public final class VoxelPrintConfig {
             structureFormat = StructureFormat.fromId(
                     reader.getString(KEY_STRUCTURE_FORMAT, DEFAULT_STRUCTURE_FORMAT.id()),
                     DEFAULT_STRUCTURE_FORMAT);
+            setWebPlatformUrl(reader.getString(KEY_WEB_PLATFORM_URL, DEFAULT_WEB_PLATFORM_URL));
         });
         VoxelPrint.LOGGER.info("Configuration loaded: maxSelectionVolume={}, maxSelectionEdge={}, debugLogging={}",
                 maxSelectionVolume, maxSelectionEdge, debugLogging);
@@ -138,6 +148,7 @@ public final class VoxelPrintConfig {
             writer.put(KEY_MODEL_COLOUR_DETAIL, modelColourDetail);
             writer.put(KEY_ASYNC_WRITING, asynchronousFileWriting);
             writer.put(KEY_STRUCTURE_FORMAT, structureFormat.id());
+            writer.put(KEY_WEB_PLATFORM_URL, webPlatformUrl);
         });
         debug("Configuration saved: maxSelectionVolume={}, maxSelectionEdge={}",
                 maxSelectionVolume, maxSelectionEdge);
@@ -177,6 +188,28 @@ public final class VoxelPrintConfig {
 
     public String exportDirectory() {
         return exportDirectory;
+    }
+
+    /** Where Upload sends an export, without a trailing slash, or empty for off. */
+    public String webPlatformUrl() {
+        return webPlatformUrl;
+    }
+
+    /**
+     * Sets the website an export can be uploaded to.
+     *
+     * <p>Only http and https are accepted, and anything else is treated as
+     * blank: this value ends up in a request the mod makes on the player's
+     * behalf, and a config file is not the place to be talked into some other
+     * protocol. A trailing slash is dropped so paths can be appended plainly.
+     */
+    public void setWebPlatformUrl(String value) {
+        String trimmed = value == null ? "" : value.trim();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        String lower = trimmed.toLowerCase(java.util.Locale.ROOT);
+        webPlatformUrl = lower.startsWith("http://") || lower.startsWith("https://") ? trimmed : "";
     }
 
     /**

@@ -6,6 +6,7 @@ import de.tobi.voxelprint.config.VoxelPrintConfig;
 import de.tobi.voxelprint.export.ExportFileManager;
 import de.tobi.voxelprint.export.ExportService;
 import de.tobi.voxelprint.selection.SelectionManager;
+import de.tobi.voxelprint.upload.UploadService;
 import de.tobi.voxelprint.selection.SelectionOutline;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -69,11 +70,12 @@ public final class VoxelPrint implements ClientModInitializer {
         configScreens = opener;
 
         SelectionManager selections = new SelectionManager();
-        ExportService exports = new ExportService(config,
-                new ExportFileManager(FabricLoader.getInstance().getGameDir(), config));
+        ExportFileManager files = new ExportFileManager(FabricLoader.getInstance().getGameDir(), config);
+        ExportService exports = new ExportService(config, files);
+        UploadService uploads = new UploadService();
 
-        VoxelPrintCommands commands =
-                new VoxelPrintCommands(selections, config, exports, opener::requestOpen);
+        VoxelPrintCommands commands = new VoxelPrintCommands(
+                selections, config, exports, files, uploads, opener::requestOpen);
         ClientCommandRegistrationCallback.EVENT.register(
                 (dispatcher, context) -> commands.register(dispatcher));
 
