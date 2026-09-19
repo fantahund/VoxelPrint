@@ -132,11 +132,12 @@ public final class ModelCapture {
             }
 
             // A few blocks are drawn half by a model and half by the game: a
-            // bell is a frame plus a bell. The second half comes from an entity
-            // model and has to be asked for separately, or it is simply absent
-            // -- and a block with a partial model gets no bounding box to fall
-            // back on either.
-            collect(quads, BlockEntityCapture.facesOf(state, client.getEntityModels()));
+            // bell is a frame plus a bell, a copper golem statue is nothing but
+            // the second half. That half is drawn by a block entity renderer and
+            // has to be asked for separately, or it is simply absent -- and a
+            // block with a partial model gets no bounding box to fall back on
+            // either.
+            collect(quads, BlockEntityCapture.facesOf(client, level, where));
             return quads;
         } catch (RuntimeException e) {
             // A modded block may not survive being asked outside a render pass.
@@ -166,15 +167,16 @@ public final class ModelCapture {
      *
      * <p>They arrive already placed in the block, and with their texture
      * coordinates running from zero to one rather than in pixels -- an entity
-     * model has a texture to itself and needs no atlas to be undone. Scaling
-     * them up is all that separates the two paths; from there a face is a face.
+     * model is drawn across its whole texture, whether that texture stands on
+     * its own or was stitched into an atlas. Scaling them up is all that
+     * separates the two paths; from there a face is a face.
      *
      * <p>Never tinted. A tint comes from the biome by way of the block colour
      * handlers, and nothing that is drawn this way takes one.
      */
     private void collect(List<ModelQuad> into, List<BlockEntityCapture.Face> faces) {
         for (BlockEntityCapture.Face face : faces) {
-            BlockTexture texture = textureOf(face.texture(), null);
+            BlockTexture texture = textureOf(face.texture(), face.sprite());
             float[] texels = new float[8];
             if (texture != null) {
                 float[] source = face.texels();
